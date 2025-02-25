@@ -1,0 +1,69 @@
+NumTeachPoses := 10
+
+dev_update_off ()
+dev_close_window ()
+dev_open_window_fit_size (0, 0, 900, 500, 1000, 1000, WindowHandle)
+set_display_font (WindowHandle, 18, 'mono', 'true', 'false')
+
+* Connect to robot
+RobotIP := '172.22.147.23'
+MVTecURProgram := 'MVTecSocketCommMoveLBlended.urp'
+ur_init_robot_control (RobotIP, MVTecURProgram, AcceptingSocket, MVRobotSocket)
+
+* Set robot poses and save them as tuple
+read_tuple('teached_tool_in_base_poses_soll.tpl', B_Ps_T_basis_soll)
+B_P_T_basis_soll := B_Ps_T_basis_soll[0*7:0*7+6]
+ur_mvsocket_move(MVRobotSocket, B_P_T_basis_soll,'moveJ')
+
+measuring := true
+B_Ps_T := []
+B_Ps_T_basis := []
+PosesNames := []
+PoseIter := 0
+for PoseIter := 0 to NumTeachPoses-1 by 1
+    dev_clear_window ()
+    disp_message (WindowHandle, 'Move to Pose '+(PoseIter+1)+' of '+NumTeachPoses, 'window', 12, 12, 'black', 'true')
+    ur_mvsocket_set_teach_mode (MVRobotSocket, 'on')
+    while (1)
+        disp_message (WindowHandle, 'Move to Pose '+(PoseIter+1)+' of '+NumTeachPoses, 'window', 12, 12, 'black', 'true')
+        Button := 0
+        try
+            get_mposition (WindowHandle, Row, Column, Button)
+        catch (Exception)
+        endtry
+        if (Button == 1)
+            break
+        endif
+    endwhile
+    dev_clear_window ()
+    ur_mvsocket_set_teach_mode (MVRobotSocket, 'off')
+    wait_seconds (1)
+        ur_mvsocket_get_pose(MVRobotSocket, B_P_T)
+    B_Ps_T := [B_Ps_T, B_P_T]
+    write_tuple (B_P_T, 'teached_tool_in_base_pose_'+PoseIter$'02'+'.tpl')
+    ur_mvsocket_move(MVRobotSocket, B_P_T_basis_soll,'moveJ')
+    ur_mvsocket_get_pose(MVRobotSocket, B_P_T_basis)
+    wait_seconds (1)
+    B_Ps_T_basis := [B_Ps_T_basis, B_P_T_basis]
+    write_tuple (B_P_T_basis, 'teached_tool_in_base_pose_basis_'+PoseIter$'02'+'.tpl')
+    disp_message (WindowHandle, 'Saved Pose '+(PoseIter+1)+' of '+NumTeachPoses, 'window', 12, 12, 'black', 'true')
+    wait_seconds (1)
+    
+*         try
+*             get_mposition (WindowHandle, Row, Column, Button)
+*         catch (Exception)
+*         endtry
+*         if (Button == 8)
+*             measuring := false
+*         endif
+*     endwhile
+*     ur_mvsocket_move(MVRobotSocket, B_P_T_basis,'moveJ')
+endfor
+close_socket (AcceptingSocket)
+close_socket (MVRobotSocket)
+write_tuple (B_Ps_T, 'teached_tool_in_base_poses.tpl')
+
+* read_tuple('teached_tool_in_base_poses_soll.tpl', B_Ps_T_soll)
+* ur_mvsocket_move(MVRobotSocket, B_Ps_T_soll,'moveJ')
+* close_socket (AcceptingSocket)
+* close_socket (MVRobotSocket)
