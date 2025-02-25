@@ -1,0 +1,100 @@
+ReadRobotPoses := true
+NumTeachPoses := 2
+NumSatz := 3
+
+dev_update_off ()
+dev_close_window ()
+dev_open_window_fit_size (0, 0, 900, 500, 1000, 1000, WindowHandle)
+set_display_font (WindowHandle, 18, 'mono', 'true', 'false')
+
+* Connect to robot
+RobotIP := '172.22.147.23'
+MVTecURProgram := 'MVTecSocketCommMoveLBlended.urp'
+ur_init_robot_control (RobotIP, MVTecURProgram, AcceptingSocket, MVRobotSocket)
+
+* Set robot poses and save them as tuple
+if (1)
+if (ReadRobotPoses == false)
+    measuring := true
+    B_Ps_T := []
+    PosesNames := []
+    PoseIter := 0
+    for PoseIter := 0 to NumTeachPoses-1 by 1
+        dev_clear_window ()
+        ur_mvsocket_set_teach_mode (MVRobotSocket, 'on')
+        while (1)
+            disp_message (WindowHandle, 'Move to Pose '+(PoseIter+1)+' of '+NumTeachPoses, 'window', 12, 12, 'black', 'true')
+            Button := 0
+            try
+                get_mposition (WindowHandle, Row, Column, Button)
+            catch (Exception)
+            endtry
+            if (Button == 1)
+                break
+            endif
+        endwhile
+        dev_clear_window ()
+        ur_mvsocket_set_teach_mode (MVRobotSocket, 'off')
+        wait_seconds (1)
+        ur_mvsocket_get_pose(MVRobotSocket, B_P_T)
+        wait_seconds (1)
+        B_Ps_T := [B_Ps_T, B_P_T]
+        disp_message (WindowHandle, 'Saved Pose '+(PoseIter+1)+' of '+NumTeachPoses, 'window', 12, 12, 'black', 'true')
+        wait_seconds (1)
+        
+*             try
+*                 get_mposition (WindowHandle, Row, Column, Button)
+*             catch (Exception)
+*             endtry
+*             if (Button == 8)
+*                 measuring := false
+*             endif
+*         endwhile
+    endfor
+    close_socket (AcceptingSocket)
+    close_socket (MVRobotSocket)
+    write_tuple (B_Ps_T, 'teached_tool_in_base_poses_soll.tpl')
+    
+* Load saved robot poses and move to each pose
+* save the actual pose
+elseif (ReadRobotPoses == true)
+    ur_mvsocket_set_teach_mode (MVRobotSocket, 'off')
+    wait_seconds (1)
+    read_tuple('teached_tool_in_base_poses_soll.tpl', B_Ps_T_soll)
+    NumPoses := |B_Ps_T_soll|/7
+    B_Ps_T_ist := []
+    for SatzIter := 0 to NumSatz-1 by 1
+        for PoseIter := 0 to NumPoses-1 by 1
+            dev_clear_window ()
+            B_P_T_soll := B_Ps_T_soll[PoseIter*7:PoseIter*7+6]
+            ur_mvsocket_move(MVRobotSocket, B_P_T_soll,'moveJ')
+            wait_seconds (2.0)
+            disp_message (WindowHandle, 'Satz: '+SatzIter$'02'+'. Moved to saved Pose '+(PoseIter+1)+' of '+NumPoses, 'window', 12, 12, 'black', 'true')
+*             while (1)
+*                 Button := 0
+*                 try
+*                     get_mposition (WindowHandle, Row, Column, Button)
+*                 catch (Exception)
+*                 endtry
+*                 if (Button == 1)
+*                     break
+*                 endif
+*             endwhile
+            ur_mvsocket_get_pose(MVRobotSocket, B_P_T_ist)
+*             wait_seconds (0.25)
+            B_Ps_T_ist := [B_Ps_T_ist, B_P_T_ist]
+            write_tuple (B_P_T_ist, 'tool_in_base_pose_Satz'+SatzIter$'02'+'_Pose'+PoseIter$'02'+'_Messaufbau_3_v100.tpl')
+            disp_message (WindowHandle, 'Saved actual Pose '+(PoseIter+1)+' of '+NumPoses, 'window', 12, 12, 'black', 'true')
+        endfor
+    endfor
+    close_socket (AcceptingSocket)
+    close_socket (MVRobotSocket)
+    write_tuple (B_Ps_T_ist, 'tool_in_base_poses_Messaufbau_3_v100.tpl')
+endif
+dev_close_window ()
+endif
+
+* read_tuple('teached_tool_in_base_poses_soll.tpl', B_Ps_T_soll)
+* ur_mvsocket_move(MVRobotSocket, B_Ps_T_soll,'moveJ')
+* close_socket (AcceptingSocket)
+* close_socket (MVRobotSocket)
