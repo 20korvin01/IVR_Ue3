@@ -5,7 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-
+### PLOTTING FUNCTIONS ###
 def plot_raw(data):
     # Plot the data
     fig = plt.figure()
@@ -23,7 +23,6 @@ def plot_raw(data):
     ax.set_title("3D Plot of Target Positions")
     ax.legend()
     plt.show()
-
 
 def plot_all(points, centers, normal_vectors):
     """
@@ -55,18 +54,20 @@ def plot_all(points, centers, normal_vectors):
             color='k', length=50, normalize=True
         )
 
-    # Extract coordinates of the three targets to form a triangle
-    target_points = []
-    for i in range(1, 4):
-        subset = points[points[:, 0] == i]
-        if subset.shape[0] > 0:
-            target_points.append(subset[0, 1:4])  # Take first point for each target
-    
-    if len(target_points) == 3:
-        triangle = np.array(target_points)
+    # Draw triangles for each set of target positions
+    num_triangles = min(len(points) // 3, 10)  # Ensure there are enough points
 
-        # Define the triangle as a polygon and add it to the plot
-        ax.add_collection3d(Poly3DCollection([triangle], alpha=0.3, color='cyan', edgecolor='k'))
+    for j in range(num_triangles):
+        target_points = []
+        for i in range(1, 4):  # Collect one point for each target (1, 2, 3)
+            subset = points[points[:, 0] == i]
+            if subset.shape[0] > j:  # Ensure there are enough points
+                target_points.append(subset[j, 1:4])  # Take the j-th point for each target
+        
+        if len(target_points) == 3:
+            triangle = np.array(target_points)
+            ax.add_collection3d(Poly3DCollection([triangle], alpha=0.3, color='cyan', edgecolor='k'))
+
     
     # Set equal axis scale
     def set_axes_equal(ax):
@@ -100,11 +101,8 @@ def plot_all(points, centers, normal_vectors):
     
     plt.show()
 
-
-
     
-    
-    
+### EVALUATION FUNCTIONS ###    
 def wsd_punkte(data):
     """
     Standard deviation of the 3D points
@@ -163,8 +161,6 @@ def planes(data):
     return centers, normal_vectors
 
     
-    
-    
 if __name__ == "__main__":
     # File names
     file_names = [
@@ -173,45 +169,52 @@ if __name__ == "__main__":
         "data/tracker/pose2.txt",
     ]
     
-
-    # Choose the file
-    file_name = file_names[0]
+    for i, file_name in enumerate(file_names):
+        print(f"{i+1}: {file_name}")
     
-    # Read the file
-    data = np.genfromtxt(file_name, delimiter=",", skip_header=0)
-    
-    # Get data by id
-    target_1 = data[data[:, 0] == 1][:, 1:] # x, y, z
-    target_2 = data[data[:, 0] == 2][:, 1:] # x, y, z
-    target_3 = data[data[:, 0] == 3][:, 1:] # x, y, z
-    
-    # Calculate the standard deviation for each target
-    target_1_std_3d = wsd_punkte(target_1)
-    target_2_std_3d = wsd_punkte(target_2)
-    target_3_std_3d = wsd_punkte(target_3)
-    
-    # Compute the centers and normal vectors of the planes defined by 3 corresponding points
-    centers, normal_vectors = planes(data)
-    
-    # Calculate the standard deviation for the centers
-    centers_std_3d = wsd_punkte(np.array(centers))
-    
-    # Calculate the standard deviation for the normal vectors
-    normal_vectors_std = wsd_vektoren(np.array(normal_vectors))
-    
-    
-    ### PLOTTING ###
-    # plot_raw(data)
-    plot_all(data, centers, normal_vectors)
-    
-    ### LOGGING ###
-    print(f"Std. of target 1 [mm]: {target_1_std_3d:.3f}")
-    print(f"Std. of target 2 [mm]: {target_2_std_3d:.3f}")
-    print(f"Std. of target 3 [mm]: {target_3_std_3d:.3f}")
-    print(f"Std. of the centers [mm]: {centers_std_3d:.3f}")
-    print(f"Std. of the normal vectors [°]: {np.degrees(normal_vectors_std):.3f}")
-    
-    
+        # Read the file
+        data = np.genfromtxt(file_name, delimiter=",", skip_header=0)
+        
+        # Get data by id
+        target_1 = data[data[:, 0] == 1][:, 1:] # x, y, z
+        target_2 = data[data[:, 0] == 2][:, 1:] # x, y, z
+        target_3 = data[data[:, 0] == 3][:, 1:] # x, y, z
+        
+        # Calculate the standard deviation for each target
+        target_1_std_3d = wsd_punkte(target_1)
+        target_2_std_3d = wsd_punkte(target_2)
+        target_3_std_3d = wsd_punkte(target_3)
+        
+        # Compute the centers and normal vectors of the planes defined by 3 corresponding points
+        centers, normal_vectors = planes(data)
+        
+        # Calculate the standard deviation for the centers
+        centers_std_3d = wsd_punkte(np.array(centers))
+        
+        # Calculate the standard deviation for the normal vectors
+        normal_vectors_std = wsd_vektoren(np.array(normal_vectors))
+        
+        
+        ### PLOTTING ###
+        # plot_raw(data)
+        # plot_all(data, centers, normal_vectors)
+        
+        ### LOGGING ###
+        print(f"Std. of target 1 [mm]: {target_1_std_3d:.3f}")
+        print(f"Std. of target 2 [mm]: {target_2_std_3d:.3f}")
+        print(f"Std. of target 3 [mm]: {target_3_std_3d:.3f}")
+        print(f"Std. of the centers [mm]: {centers_std_3d:.3f}")
+        print(f"Std. of the normal vectors [°]: {np.degrees(normal_vectors_std):.3f}")
+        
+        ### WRITING TO FILE ###
+        with open(f"{file_name[:-4]}_results.txt", "w", encoding="utf-8") as f:
+            f.write(f"Std. of target 1 [mm]: {target_1_std_3d:.3f}\n")
+            f.write(f"Std. of target 2 [mm]: {target_2_std_3d:.3f}\n")
+            f.write(f"Std. of target 3 [mm]: {target_3_std_3d:.3f}\n")
+            f.write(f"Std. of the centers [mm]: {centers_std_3d:.3f}\n")
+            f.write(f"Std. of the normal vectors [°]: {np.degrees(normal_vectors_std):.3f}\n")
+        
+        
 
     
     
