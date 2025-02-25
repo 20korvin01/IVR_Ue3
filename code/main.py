@@ -1,5 +1,9 @@
-import matplotlib.pyplot as plt
+import numpy as np  
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
 
 
 def plot_raw(data):
@@ -19,6 +23,85 @@ def plot_raw(data):
     ax.set_title("3D Plot of Target Positions")
     ax.legend()
     plt.show()
+
+
+def plot_all(points, centers, normal_vectors):
+    """
+    Plot the 3D points, the centers of the planes, the normal vectors of the planes, 
+    and a triangle through Target 1, Target 2, and Target 3.
+    """
+    
+    # Create figure
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Define colors and labels for three targets
+    colors = ['r', 'g', 'b']
+    labels = ['Target 1', 'Target 2', 'Target 3']
+    
+    # Scatter plot for the three targets
+    for i in range(1, 4):
+        subset = points[points[:, 0] == i]  # Select points for target i
+        ax.scatter(subset[:, 1], subset[:, 2], subset[:, 3], c=colors[i-1], label=labels[i-1], alpha=0.7)
+
+    # Scatter plot for centers (brown)
+    ax.scatter(centers[:, 0], centers[:, 1], centers[:, 2], c='brown', label='Centers', alpha=0.9, marker='o', s=50)
+
+    # Plot normal vectors (black arrows)
+    for i in range(centers.shape[0]):
+        ax.quiver(
+            centers[i, 0], centers[i, 1], centers[i, 2], 
+            normal_vectors[i, 0], normal_vectors[i, 1], normal_vectors[i, 2], 
+            color='k', length=50, normalize=True
+        )
+
+    # Extract coordinates of the three targets to form a triangle
+    target_points = []
+    for i in range(1, 4):
+        subset = points[points[:, 0] == i]
+        if subset.shape[0] > 0:
+            target_points.append(subset[0, 1:4])  # Take first point for each target
+    
+    if len(target_points) == 3:
+        triangle = np.array(target_points)
+
+        # Define the triangle as a polygon and add it to the plot
+        ax.add_collection3d(Poly3DCollection([triangle], alpha=0.3, color='cyan', edgecolor='k'))
+    
+    # Set equal axis scale
+    def set_axes_equal(ax):
+        """Make the 3D plot axes have equal scale."""
+        x_limits = ax.get_xlim()
+        y_limits = ax.get_ylim()
+        z_limits = ax.get_zlim()
+
+        x_range = x_limits[1] - x_limits[0]
+        y_range = y_limits[1] - y_limits[0]
+        z_range = z_limits[1] - z_limits[0]
+
+        max_range = max(x_range, y_range, z_range)
+
+        x_middle = np.mean(x_limits)
+        y_middle = np.mean(y_limits)
+        z_middle = np.mean(z_limits)
+
+        ax.set_xlim([x_middle - max_range / 2, x_middle + max_range / 2])
+        ax.set_ylim([y_middle - max_range / 2, y_middle + max_range / 2])
+        ax.set_zlim([z_middle - max_range / 2, z_middle + max_range / 2])
+
+    set_axes_equal(ax)
+
+    # Labels and title
+    ax.set_xlabel("X Coordinate")
+    ax.set_ylabel("Y Coordinate")
+    ax.set_zlabel("Z Coordinate")
+    ax.set_title("3D Plot of Target Positions")
+    ax.legend()
+    
+    plt.show()
+
+
+
     
     
     
@@ -55,7 +138,6 @@ def wsd_vektoren(data):
     
     return std_phi
     
-
 def planes(data):
     """
     Calculate the centers and normal vectors of the planes defined by 3 corresponding points
@@ -91,8 +173,9 @@ if __name__ == "__main__":
         "data/tracker/pose2.txt",
     ]
     
+
     # Choose the file
-    file_name = file_names[1]
+    file_name = file_names[0]
     
     # Read the file
     data = np.genfromtxt(file_name, delimiter=",", skip_header=0)
@@ -115,6 +198,11 @@ if __name__ == "__main__":
     
     # Calculate the standard deviation for the normal vectors
     normal_vectors_std = wsd_vektoren(np.array(normal_vectors))
+    
+    
+    ### PLOTTING ###
+    # plot_raw(data)
+    plot_all(data, centers, normal_vectors)
     
     ### LOGGING ###
     print(f"Std. of target 1 [mm]: {target_1_std_3d:.3f}")
