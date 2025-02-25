@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="24.11.1.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>ReadRobotPoses := true</l>
+<l>NumTeachPoses := 2</l>
+<l>NumSatz := 3</l>
+<c></c>
+<l>dev_update_off ()</l>
+<l>dev_close_window ()</l>
+<l>dev_open_window_fit_size (0, 0, 900, 500, 1000, 1000, WindowHandle)</l>
+<l>set_display_font (WindowHandle, 18, 'mono', 'true', 'false')</l>
+<c></c>
+<c>* Connect to robot</c>
+<l>RobotIP := '172.22.147.23'</l>
+<l>MVTecURProgram := 'MVTecSocketCommMoveLBlended.urp'</l>
+<l>ur_init_robot_control (RobotIP, MVTecURProgram, AcceptingSocket, MVRobotSocket)</l>
+<c></c>
+<c>* Set robot poses and save them as tuple</c>
+<l>if (1)</l>
+<l>if (ReadRobotPoses == false)</l>
+<l>    measuring := true</l>
+<l>    B_Ps_T := []</l>
+<l>    PosesNames := []</l>
+<l>    PoseIter := 0</l>
+<l>    for PoseIter := 0 to NumTeachPoses-1 by 1</l>
+<l>        dev_clear_window ()</l>
+<l>        ur_mvsocket_set_teach_mode (MVRobotSocket, 'on')</l>
+<l>        while (1)</l>
+<l>            disp_message (WindowHandle, 'Move to Pose '+(PoseIter+1)+' of '+NumTeachPoses, 'window', 12, 12, 'black', 'true')</l>
+<l>            Button := 0</l>
+<l>            try</l>
+<l>                get_mposition (WindowHandle, Row, Column, Button)</l>
+<l>            catch (Exception)</l>
+<l>            endtry</l>
+<l>            if (Button == 1)</l>
+<l>                break</l>
+<l>            endif</l>
+<l>        endwhile</l>
+<l>        dev_clear_window ()</l>
+<l>        ur_mvsocket_set_teach_mode (MVRobotSocket, 'off')</l>
+<l>        wait_seconds (1)</l>
+<l>        ur_mvsocket_get_pose(MVRobotSocket, B_P_T)</l>
+<l>        wait_seconds (1)</l>
+<l>        B_Ps_T := [B_Ps_T, B_P_T]</l>
+<l>        disp_message (WindowHandle, 'Saved Pose '+(PoseIter+1)+' of '+NumTeachPoses, 'window', 12, 12, 'black', 'true')</l>
+<l>        wait_seconds (1)</l>
+<c>        </c>
+<l>*             try</l>
+<l>*                 get_mposition (WindowHandle, Row, Column, Button)</l>
+<l>*             catch (Exception)</l>
+<l>*             endtry</l>
+<l>*             if (Button == 8)</l>
+<l>*                 measuring := false</l>
+<l>*             endif</l>
+<l>*         endwhile</l>
+<l>    endfor</l>
+<l>    close_socket (AcceptingSocket)</l>
+<l>    close_socket (MVRobotSocket)</l>
+<l>    write_tuple (B_Ps_T, 'teached_tool_in_base_poses_soll.tpl')</l>
+<c>    </c>
+<c>* Load saved robot poses and move to each pose</c>
+<c>* save the actual pose</c>
+<l>elseif (ReadRobotPoses == true)</l>
+<l>    ur_mvsocket_set_teach_mode (MVRobotSocket, 'off')</l>
+<l>    wait_seconds (1)</l>
+<l>    read_tuple('teached_tool_in_base_poses_soll.tpl', B_Ps_T_soll)</l>
+<l>    NumPoses := |B_Ps_T_soll|/7</l>
+<l>    B_Ps_T_ist := []</l>
+<l>    for SatzIter := 0 to NumSatz-1 by 1</l>
+<l>        for PoseIter := 0 to NumPoses-1 by 1</l>
+<l>            dev_clear_window ()</l>
+<l>            B_P_T_soll := B_Ps_T_soll[PoseIter*7:PoseIter*7+6]</l>
+<l>            ur_mvsocket_move(MVRobotSocket, B_P_T_soll,'moveJ')</l>
+<l>            wait_seconds (2.0)</l>
+<l>            disp_message (WindowHandle, 'Satz: '+SatzIter$'02'+'. Moved to saved Pose '+(PoseIter+1)+' of '+NumPoses, 'window', 12, 12, 'black', 'true')</l>
+<l>*             while (1)</l>
+<l>*                 Button := 0</l>
+<l>*                 try</l>
+<l>*                     get_mposition (WindowHandle, Row, Column, Button)</l>
+<l>*                 catch (Exception)</l>
+<l>*                 endtry</l>
+<l>*                 if (Button == 1)</l>
+<l>*                     break</l>
+<l>*                 endif</l>
+<l>*             endwhile</l>
+<l>            ur_mvsocket_get_pose(MVRobotSocket, B_P_T_ist)</l>
+<l>*             wait_seconds (0.25)</l>
+<l>            B_Ps_T_ist := [B_Ps_T_ist, B_P_T_ist]</l>
+<l>            write_tuple (B_P_T_ist, 'tool_in_base_pose_Satz'+SatzIter$'02'+'_Pose'+PoseIter$'02'+'_Messaufbau_3_v100.tpl')</l>
+<l>            disp_message (WindowHandle, 'Saved actual Pose '+(PoseIter+1)+' of '+NumPoses, 'window', 12, 12, 'black', 'true')</l>
+<l>        endfor</l>
+<l>    endfor</l>
+<l>    close_socket (AcceptingSocket)</l>
+<l>    close_socket (MVRobotSocket)</l>
+<l>    write_tuple (B_Ps_T_ist, 'tool_in_base_poses_Messaufbau_3_v100.tpl')</l>
+<l>endif</l>
+<l>dev_close_window ()</l>
+<l>endif</l>
+<c></c>
+<l>* read_tuple('teached_tool_in_base_poses_soll.tpl', B_Ps_T_soll)</l>
+<l>* ur_mvsocket_move(MVRobotSocket, B_Ps_T_soll,'moveJ')</l>
+<l>* close_socket (AcceptingSocket)</l>
+<l>* close_socket (MVRobotSocket)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
