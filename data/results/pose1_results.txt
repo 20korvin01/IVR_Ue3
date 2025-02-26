@@ -1,0 +1,19 @@
+#########################################
+#     ISO 9283: 1998 (E) Evaluation     #
+#########################################
+Pos. repeat. all points       : 0.0120 mm
+Pos. repeat.  targ. 1         : 0.0130 mm
+Pos. repeat.  targ. 2         : 0.0154 mm
+Pos. repeat.  targ. 3         : 0.0173 mm
+-----------------------------------------
+Orient. repeat.  norm. vec. 1 : 0.0024 °
+Orient. repeat.  norm. vec. 2 : 0.0018 °
+Orient. repeat.  norm. vec. 3 : 0.0013 °
+-----------------------------------------
+#########################################
+#            Own Evaluation             #
+#########################################
+Std. of all points            : 0.0054 mm
+Std. of target 1              : 0.0066 mm
+Std. of target 2              : 0.0078 mm
+Std. of target 3              : 0.0084 mm

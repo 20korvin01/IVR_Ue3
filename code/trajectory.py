@@ -51,10 +51,10 @@ if __name__ == '__main__':
         # plot_trajectory(data, plot_name)
         
         # Save data to .ply file
-        # first the header
+        # header
         header = "ply\nformat ascii 1.0\nelement vertex " + str(len(data)) + "\nproperty float x\nproperty float y\nproperty float z\nend_header\n"
-        # then the data
-        with open("data/tracker/" + plot_name + ".ply", "w") as f:
+        # data
+        with open("data/results/" + plot_name + ".ply", "w") as f:
             f.write(header)
             for i in range(len(data)):
                 f.write(str(data[i][1]) + " " + str(data[i][2]) + " " + str(data[i][3]) + "\n")

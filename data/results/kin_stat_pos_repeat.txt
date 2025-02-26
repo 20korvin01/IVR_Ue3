@@ -1,0 +1,4 @@
+Pose1Stationaer_fest [mm]  :  0.01096
+Pose1Stationaer_freedrive [mm]  :  0.01471
+PoseAussenStationaer_fest [mm]  :  0.01065
+PoseAussenStationaer_freedrive [mm]  :  0.00874

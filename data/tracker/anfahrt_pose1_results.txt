@@ -1,5 +1,0 @@
-Std. of target 1 [mm]: 0.186
-Std. of target 2 [mm]: 0.217
-Std. of target 3 [mm]: 0.109
-Std. of the centers [mm]: 0.166
-Std. of the normal vectors [°]: 0.030
