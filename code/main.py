@@ -1,5 +1,4 @@
 import numpy as np  
-import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -135,6 +134,29 @@ def wsd_vektoren(data):
     std_phi = np.sqrt(np.sum(d_phis) / (data.shape[0] - 1))
     
     return std_phi
+  
+def pos_repeat(data):
+    """
+    Positioning repeatability of the 3D points. ~ ISO 9283: 1998 (E)
+    """
+    # Extract x, y, z
+    xs = data[:, 0]
+    ys = data[:, 1]
+    zs = data[:, 2]
+    # Compute the mean of the x, y, z coordinates
+    mean_x = np.mean(xs) # x_bar
+    mean_y = np.mean(ys) # y_bar
+    mean_z = np.mean(zs) # z_bar
+    # Compute distance of each point to the m ean
+    distances = np.sqrt((xs - mean_x)**2 + (ys - mean_y)**2 + (zs - mean_z)**2)  # l_j
+    # Compute the mean of the distances
+    mean_distance = np.mean(distances)  # l_bar
+    # Compute S_l
+    std_l = np.sqrt(np.sum((distances - mean_distance)**2) / (data.shape[0] - 1))  # S_l
+    # Compute the positioning repeatability
+    pos_repeat = mean_distance + 3 * std_l  # RP_l
+    
+    return pos_repeat
     
 def planes(data):
     """
@@ -161,12 +183,12 @@ def planes(data):
     return centers, normal_vectors
 
     
-if __name__ == "__main__":
+if __name__ == "__main__":   
     # File names
     file_names = [
-        "data/tracker/anfahrt_pose1.txt",
         "data/tracker/pose1.txt",
         "data/tracker/pose2.txt",
+        "data/tracker/anfahrt_pose1.txt",
     ]
     
     for i, file_name in enumerate(file_names):
@@ -174,16 +196,38 @@ if __name__ == "__main__":
     
         # Read the file
         data = np.genfromtxt(file_name, delimiter=",", skip_header=0)
-        
+                
         # Get data by id
         target_1 = data[data[:, 0] == 1][:, 1:] # x, y, z
         target_2 = data[data[:, 0] == 2][:, 1:] # x, y, z
         target_3 = data[data[:, 0] == 3][:, 1:] # x, y, z
         
+        # Calculate center points of the triangles defined by the 3 corresponding points
+        centers = (target_1 + target_2 + target_3) / 3 # x, y, z
+        
+        # Calculate the pose repeatability
+        centers_3d_repeat   = pos_repeat(centers)
+        target_1_pos_repeat = pos_repeat(target_1)
+        target_2_pos_repeat = pos_repeat(target_2)
+        target_3_pos_repeat = pos_repeat(target_3)
+        
+        print(f"Pos. repeat. all points: {centers_3d_repeat:.4f} mm")
+        print(f"Pos. repeat.  targ. 1  : {target_1_pos_repeat:.4f} mm")
+        print(f"Pos. repeat.  targ. 2  : {target_2_pos_repeat:.4f} mm")
+        print(f"Pos. repeat.  targ. 3  : {target_3_pos_repeat:.4f} mm")
+        
         # Calculate the standard deviation for each target
+        centers_std_3d  = wsd_punkte(centers)
         target_1_std_3d = wsd_punkte(target_1)
         target_2_std_3d = wsd_punkte(target_2)
         target_3_std_3d = wsd_punkte(target_3)
+        
+        print(f"Std. of all points [mm]: {centers_std_3d:.4f}")
+        print(f"Std. of target 1 [mm]  : {target_1_std_3d:.4f}")
+        print(f"Std. of target 2 [mm]  : {target_2_std_3d:.4f}")
+        print(f"Std. of target 3 [mm]  : {target_3_std_3d:.4f}")
+        
+        print("=="*50)
         
         # Compute the centers and normal vectors of the planes defined by 3 corresponding points
         centers, normal_vectors = planes(data)
@@ -199,22 +243,19 @@ if __name__ == "__main__":
         # plot_raw(data)
         # plot_all(data, centers, normal_vectors)
         
-        ### LOGGING ###
-        print(f"Std. of target 1 [mm]: {target_1_std_3d:.3f}")
-        print(f"Std. of target 2 [mm]: {target_2_std_3d:.3f}")
-        print(f"Std. of target 3 [mm]: {target_3_std_3d:.3f}")
-        print(f"Std. of the centers [mm]: {centers_std_3d:.3f}")
-        print(f"Std. of the normal vectors [°]: {np.degrees(normal_vectors_std):.3f}")
+        # break
         
-        ### WRITING TO FILE ###
-        with open(f"{file_name[:-4]}_results.txt", "w", encoding="utf-8") as f:
-            f.write(f"Std. of target 1 [mm]: {target_1_std_3d:.3f}\n")
-            f.write(f"Std. of target 2 [mm]: {target_2_std_3d:.3f}\n")
-            f.write(f"Std. of target 3 [mm]: {target_3_std_3d:.3f}\n")
-            f.write(f"Std. of the centers [mm]: {centers_std_3d:.3f}\n")
-            f.write(f"Std. of the normal vectors [°]: {np.degrees(normal_vectors_std):.3f}\n")
+        # ### LOGGING ###
+        # print(f"Std. of target 1 [mm]: {target_1_std_3d:.3f}")
+        # print(f"Std. of target 2 [mm]: {target_2_std_3d:.3f}")
+        # print(f"Std. of target 3 [mm]: {target_3_std_3d:.3f}")
+        # print(f"Std. of the centers [mm]: {centers_std_3d:.3f}")
+        # print(f"Std. of the normal vectors [°]: {np.degrees(normal_vectors_std):.3f}")
         
-        
-
-    
-    
+        # ### WRITING TO FILE ###
+        # with open(f"{file_name[:-4]}_results.txt", "w", encoding="utf-8") as f:
+        #     f.write(f"Std. of target 1 [mm]: {target_1_std_3d:.3f}\n")
+        #     f.write(f"Std. of target 2 [mm]: {target_2_std_3d:.3f}\n")
+        #     f.write(f"Std. of target 3 [mm]: {target_3_std_3d:.3f}\n")
+        #     f.write(f"Std. of the centers [mm]: {centers_std_3d:.3f}\n")
+        #     f.write(f"Std. of the normal vectors [°]: {np.degrees(normal_vectors_std):.3f}\n")  
