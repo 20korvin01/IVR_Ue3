@@ -6,9 +6,9 @@ Pos. repeat.  targ. 1         : 0.0215 mm
 Pos. repeat.  targ. 2         : 0.0174 mm
 Pos. repeat.  targ. 3         : 0.0116 mm
 -----------------------------------------
-Orient. repeat.  norm. vec. 1 : 0.0035 °
-Orient. repeat.  norm. vec. 2 : 0.0037 °
-Orient. repeat.  norm. vec. 3 : 0.0029 °
+Orient. repeat.  norm. vec. 1 : 0.0035 Â°
+Orient. repeat.  norm. vec. 2 : 0.0037 Â°
+Orient. repeat.  norm. vec. 3 : 0.0029 Â°
 -----------------------------------------
 #########################################
 #            Own Evaluation             #

@@ -263,7 +263,7 @@ if __name__ == "__main__":
         print("=="*50)
         
         ### WRITING TO FILE ###
-        with open("data/results/" + file_name.split("/")[-1].split(".")[0] + "_results.txt", "w") as f:
+        with open("data/results/" + file_name.split("/")[-1].split(".")[0] + "_results.txt", "w", encoding="utf-8") as f:
             f.write("#########################################\n")
             f.write("#     ISO 9283: 1998 (E) Evaluation     #\n")
             f.write("#########################################\n")
