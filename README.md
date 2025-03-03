@@ -14,18 +14,25 @@ Ziel der Übung ist die Untersuchung eines Roboterarms hinsichtlich seiner Präz
 `Trajektoriezw1u2.txt`
 
 ### Auswertung
-1. Fahren zwischen Pose 1 und 2 - jeweils 10x Messen der beiden Posen
-      1.1 Pose 1 (pose1.txt) -> pose1_results.txt
-      1.2 Pose 2 (pose2.txt) -> pose2_results.txt
-2. Anfahren von Pose 1 aus beliebiger Position - 10x Messen der Pose 1 (anfahrt_pose1.txt -> anfahrt_pose1_results.txt)
-3. Dauermessung von Pose 1, sowohl im festen als auch im Freedrive Modus
-      3.1 Pose1Stationaer_fest.txt
-      3.2 Pose1Stationaer_freedrive.txt
-4. Dauermessung von einer neuen Pose am äußeren Ende des Arbeitsbereichs, sowohl im festen als auch im Freedrive Modus
-      4.1 PoseAussenStationaer_fest.txt
-      4.2 PoseAussenStationaer_freedrive.txt
-=> Ergebnisse von 3 und 4 sind alle in kin_stat_pos_repeat.txt; Visuell jeweils eine .ply Datei (Pose1 fest und freedrive | PoseAußen fest und freedrive)
-5. Kinematische Messung der Trajektorie zwischen Pose 1 und Pose 2.
-     5.1 Geschwindigkeit bei 50% -> Trajektoriezw1u2_vel50.ply
-     5.2 Geschwindigkeit bei 100% -> Trajektoriezw1u2_vel100.ply
-=> keine Auswertung von 5 bisher | für beide Geschwindigkeiten jeweils eine ply Datei zur Visualisierung
+1. Fahren zwischen Pose 1 und 2 - jeweils 10x Messen der beiden Posen  
+   1.1) Pose 1 (pose1.txt) -> pose1_results.txt  
+   1.2) Pose 2 (pose2.txt) -> pose2_results.txt  
+
+2. Anfahren von Pose 1 aus beliebiger Position - 10x Messen der Pose 1  
+   (anfahrt_pose1.txt -> anfahrt_pose1_results.txt)  
+
+3. Dauermessung von Pose 1, sowohl im festen als auch im Freedrive Modus  
+   3.1) Pose1Stationaer_fest.txt  
+   3.2) Pose1Stationaer_freedrive.txt  
+
+4. Dauermessung von einer neuen Pose am äußeren Ende des Arbeitsbereichs, sowohl im festen als auch im Freedrive Modus  
+   4.1) PoseAussenStationaer_fest.txt  
+   4.2) PoseAussenStationaer_freedrive.txt  
+
+   => Ergebnisse von 3 und 4 sind alle in kin_stat_pos_repeat.txt; Visuell jeweils eine .ply Datei (Pose1 fest und freedrive | PoseAußen fest und freedrive)  
+
+5. Kinematische Messung der Trajektorie zwischen Pose 1 und Pose 2.  
+   5.1) Geschwindigkeit bei 50% -> Trajektoriezw1u2_vel50.ply  
+   5.2) Geschwindigkeit bei 100% -> Trajektoriezw1u2_vel100.ply  
+
+   => keine Auswertung von 5 bisher | für beide Geschwindigkeiten jeweils eine ply Datei zur Visualisierung  
