@@ -17,3 +17,5 @@ Std. of all points            : 0.0062 mm
 Std. of target 1              : 0.0089 mm
 Std. of target 2              : 0.0079 mm
 Std. of target 3              : 0.0062 mm
+-----------------------------------------
+Std. of orientation deviation : 0.00003 °

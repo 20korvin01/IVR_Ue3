@@ -241,13 +241,15 @@ if __name__ == "__main__":
         norm_vecs = normal_vectors(data)
         # Orientation repeatability
         RPa, RPb, RPc = orient_repeat(norm_vecs)
+        # Standard deviation of the orientation deviation
+        std_phi = wsd_vektoren(norm_vecs)
         
         ### PLOTTING ###
         # plot_raw(data)
         # plot_all(data, centers, normal_vectors)
         
         ### LOGGING ###
-        print(f"Pos. repeat. all points      : {centers_3d_repeat:.4f} mm")
+        # print(f"Pos. repeat. all points      : {centers_3d_repeat:.4f} mm")
         print(f"Pos. repeat.  targ. 1        : {target_1_pos_repeat:.4f} mm")
         print(f"Pos. repeat.  targ. 2        : {target_2_pos_repeat:.4f} mm")
         print(f"Pos. repeat.  targ. 3        : {target_3_pos_repeat:.4f} mm")
@@ -283,3 +285,6 @@ if __name__ == "__main__":
             f.write(f"Std. of target 1              : {target_1_std_3d:.4f} mm\n")
             f.write(f"Std. of target 2              : {target_2_std_3d:.4f} mm\n")
             f.write(f"Std. of target 3              : {target_3_std_3d:.4f} mm\n")
+            f.write("-----------------------------------------\n")
+            f.write(f"Std. of orientation deviation : {std_phi:.5f} °\n")
+            
